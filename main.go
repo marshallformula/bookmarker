@@ -82,11 +82,13 @@ func main() {
 	var output string
 
 	for _, bm := range bookmarks {
-		output += fmt.Sprint("<b>", bm.name, "</b> <small><i><u>", bm.url, "</u></i></small>@")
+		// rofi pango markup vomit on the `&` char so just display the url without any querystring params
+		pathParts := strings.Split(bm.url, "?")
+		output += fmt.Sprint("<b>", bm.name, "</b> <small><i><u>", pathParts[0], "</u></i></small>\n")
 	}
 
-	rofi_cmd := fmt.Sprint("echo \"", output, "\" | rofi -dmenu -i -format i -markup-rows -sep '@'")
-	answer, err := exec.Command("zsh", "-c", rofi_cmd).Output()
+	rofi_cmd := fmt.Sprint("printf '%s\n' \"", output, "\" | rofi -dmenu -i -format i -markup-rows")
+	answer, err := exec.Command("bash", "-c", rofi_cmd).Output()
 
 	if err != nil {
 		log.Fatal(err)
